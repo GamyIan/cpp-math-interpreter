@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -Wall -std=c++17
-SRC = src/main.cpp src/interpreter.cpp
-INC = -I../include
+SRC = $(wildcard src/*.cpp)
+INC = -Iinclude
 TARGET = interpreter
 
 all:

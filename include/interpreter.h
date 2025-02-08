@@ -4,24 +4,23 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include "command.h"
 
-using namespace std;  // Using namespace std for cleaner code
+using namespace std;
 
 class Interpreter {
 public:
     double execute(const string &input);
     
 private:
-    // Expression parsing functions with correct precedence
-    double evaluateExpression(stringstream &ss);
-    double evaluateFactor(stringstream &ss);
-    double evaluateExponent(stringstream &ss);
-    double evaluatePrimary(stringstream &ss);
+    // Parser functions that build an expression tree of Command objects.
+    CommandPtr parseExpression(stringstream &ss);
+    CommandPtr parseFactor(stringstream &ss);
+    CommandPtr parseExponent(stringstream &ss);
+    CommandPtr parsePrimary(stringstream &ss);
+    CommandPtr parseFunctionCall(const string &funcName, stringstream &ss);
 
-    // Helper: parses and evaluates function calls like add(), sub(), etc.
-    double evaluateFunctionCall(const string &funcName, stringstream &ss);
-
-    // Map for storing variables
+    // Map for storing variables (for variable lookup and assignment)
     map<string, double> variables;
 };
 

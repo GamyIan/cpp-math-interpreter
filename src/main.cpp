@@ -2,19 +2,22 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
+
 int main() {
-    std::cout << "Advanced C++ Interpreter\nType 'exit' to quit.\n";
+    cout << "Command Pattern C++ Interpreter\nType 'exit' to quit.\n";
     Interpreter interpreter;
-    std::string input;
+    string input;
     while (true) {
-        std::cout << ">> ";
-        std::getline(std::cin, input);
-        if (input == "exit" or input == "q") break;
+        cout << ">> ";
+        getline(cin, input);
+        if (input == "exit" or input == "q")
+            break;
         try {
             double result = interpreter.execute(input);
-            std::cout << "Result: " << result << std::endl;
-        } catch (const std::exception &e) {
-            std::cerr << "[ERROR]: " << e.what() << std::endl;
+            cout << "Result: " << result << endl;
+        } catch (const exception &e) {
+            cerr << "[ERROR]: " << e.what() << endl;
         }
     }
     return 0;

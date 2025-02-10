@@ -1,0 +1,28 @@
+# Test file for c-- language
+
+# Set global angle mode to degrees.
+angle_mode = degrees
+
+# Variable assignments:
+x = 5
+y = 10
+z = add(x, y, 15)
+
+# Basic arithmetic expressions:
+mul(2, z)
+(1+2^4)*9 + 3
+
+# Trigonometric functions (using global mode in degrees):
+sin(30)              
+cos(60)               
+tan(45)
+
+# Overriding the global mode: use radians for this call.
+# Here the second argument is 1 (meaning "use radians")
+sin(1.5708, 1)   
+
+# Testing line continuation using "<<".
+long_expr = 1 + 2 + 3 << + 4 + 5  
+
+# Use sqrt function:
+sqrt(144)

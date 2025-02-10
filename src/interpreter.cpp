@@ -6,31 +6,34 @@
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
+#include <optional>
 
 using namespace std;
 
-// The execute() function also supports assignment if an '=' is found.
-double Interpreter::execute(const string &input) {
+// The execute() method now returns an optional<double> so that assignments produce no output.
+optional<double> Interpreter::execute(const string &input) {
+    // Check if there's an assignment operator '=' in the statement.
     size_t pos = input.find('=');
     if (pos != string::npos) {
-        // Assignment: left side is variable name, right side is expression.
+        // Assignment: left-hand side is the variable name.
         string varName = input.substr(0, pos);
-        // Remove whitespace from varName
+        // Remove whitespace from varName.
         varName.erase(remove_if(varName.begin(), varName.end(), ::isspace), varName.end());
         string expr = input.substr(pos + 1);
         stringstream ss(expr);
         CommandPtr cmd = parseExpression(ss);
         double value = cmd->execute();
         variables[varName] = value;
-        return value;
+        return nullopt;  // For assignments, return no output.
     } else {
         stringstream ss(input);
         CommandPtr cmd = parseExpression(ss);
-        return cmd->execute();
+        double result = cmd->execute();
+        return result;
     }
 }
 
-// parseExpression: handles addition and subtraction.
+// parseExpression: Handles addition and subtraction.
 CommandPtr Interpreter::parseExpression(stringstream &ss) {
     CommandPtr left = parseFactor(ss);
     ss >> ws;
@@ -46,7 +49,7 @@ CommandPtr Interpreter::parseExpression(stringstream &ss) {
     return left;
 }
 
-// parseFactor: handles multiplication and division.
+// parseFactor: Handles multiplication and division.
 CommandPtr Interpreter::parseFactor(stringstream &ss) {
     CommandPtr left = parseExponent(ss);
     ss >> ws;
@@ -62,27 +65,27 @@ CommandPtr Interpreter::parseFactor(stringstream &ss) {
     return left;
 }
 
-// parseExponent: handles exponentiation (right-associative).
+// parseExponent: Handles exponentiation (right-associative).
 CommandPtr Interpreter::parseExponent(stringstream &ss) {
     CommandPtr left = parsePrimary(ss);
     ss >> ws;
     if (ss.peek() == '^') {
-        ss.get(); // consume '^'
-        CommandPtr right = parseExponent(ss); // right-associative
+        ss.get(); // Consume '^'
+        CommandPtr right = parseExponent(ss); // Right-associative
         left = make_shared<ExpCommand>(left, right);
     }
     return left;
 }
 
-// parsePrimary: handles numbers, parentheses, variable usage, and function calls.
+// parsePrimary: Handles numbers, parentheses, variables, and function calls.
 CommandPtr Interpreter::parsePrimary(stringstream &ss) {
     ss >> ws;
     if (ss.peek() == '(') {
-        ss.get(); // consume '('
+        ss.get(); // Consume '('
         CommandPtr cmd = parseExpression(ss);
         ss >> ws;
         if (ss.peek() == ')')
-            ss.get(); // consume ')'
+            ss.get(); // Consume ')'
         else
             throw runtime_error("Missing closing parenthesis");
         return cmd;
@@ -94,11 +97,11 @@ CommandPtr Interpreter::parsePrimary(stringstream &ss) {
             identifier.push_back(ss.get());
         }
         ss >> ws;
-        if (ss.peek() == '(') { // function call detected
-            ss.get(); // consume '('
+        if (ss.peek() == '(') { // Function call detected.
+            ss.get(); // Consume '('.
             return parseFunctionCall(identifier, ss);
         } else {
-            // Variable lookup
+            // Variable lookup.
             auto it = variables.find(identifier);
             if (it != variables.end())
                 return make_shared<NumberCommand>(it->second);
@@ -107,22 +110,23 @@ CommandPtr Interpreter::parsePrimary(stringstream &ss) {
         }
     }
     
+    // Otherwise, read a number.
     double num;
     ss >> num;
     return make_shared<NumberCommand>(num);
 }
 
-// parseFunctionCall: parses a function call with arguments.
+// parseFunctionCall: Parses a function call and its arguments.
 CommandPtr Interpreter::parseFunctionCall(const string &funcName, stringstream &ss) {
     vector<CommandPtr> args;
     ss >> ws;
-    if (ss.peek() != ')') {  // if there are arguments
+    if (ss.peek() != ')') {  // If there are arguments.
         while (true) {
             CommandPtr arg = parseExpression(ss);
             args.push_back(arg);
             ss >> ws;
             if (ss.peek() == ',') {
-                ss.get(); // consume comma
+                ss.get(); // Consume comma.
                 ss >> ws;
             } else {
                 break;
@@ -130,10 +134,9 @@ CommandPtr Interpreter::parseFunctionCall(const string &funcName, stringstream &
         }
     }
     if (ss.peek() == ')')
-        ss.get(); // consume ')'
+        ss.get(); // Consume closing parenthesis.
     else
         throw runtime_error("Missing closing parenthesis in function call");
     
-    // Create a FunctionCommand for the function call.
     return make_shared<FunctionCommand>(funcName, args);
 }

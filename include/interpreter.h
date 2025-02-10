@@ -4,13 +4,16 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <optional>
 #include "command.h"
 
 using namespace std;
 
 class Interpreter {
 public:
-    double execute(const string &input);
+    // If the statement is an expression, return its evaluated result.
+    // If it's an assignment, perform the assignment and return nullopt.
+    optional<double> execute(const string &input);
     
 private:
     // Parser functions that build an expression tree of Command objects.
@@ -20,7 +23,7 @@ private:
     CommandPtr parsePrimary(stringstream &ss);
     CommandPtr parseFunctionCall(const string &funcName, stringstream &ss);
 
-    // Map for storing variables (for variable lookup and assignment)
+    // Map for storing variables.
     map<string, double> variables;
 };
 
